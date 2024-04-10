@@ -1,5 +1,7 @@
 // Node modules
 const http = require("http");
+const https = require("https");
+const fs = require("fs");
 const path = require("path");
 
 // Third-party modules
@@ -19,7 +21,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Trust the first proxy when running in production on App Engine
-app.set("trust proxy", 1);
+// app.set("trust proxy", 1);
+
+// HTTPS options
+const options = {
+  key: fs.readFileSync(path.join(__dirname, "../ssl", "key.pem")),
+  cert: fs.readFileSync(path.join(__dirname, "../ssl", "cert.pem")),
+  // requestCert: false,
+  // rejectUnauthorized: false,
+};
 
 // Session
 app.use(
@@ -30,7 +40,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       sameSite: "lax",
-      secure: false,
+      secure: true,
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
     },
@@ -38,9 +48,9 @@ app.use(
 );
 
 // Serve React app (for production)
-if (process.env.NODE_ENV === "production") {
+// if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../dist")));
-}
+// }
 
 // Static files (for testing)
 app.use("/test", express.static(path.join(__dirname, "./test.local")));
@@ -87,21 +97,26 @@ app.use("/api/comments", require("./routes/comments"));
 app.use("/api/roles", require("./routes/roles"));
 
 // Catch-all route
-if (process.env.NODE_ENV === "production") {
+// if (process.env.NODE_ENV === "production") {
   app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "../dist", "index.html"));
   });
-}
+// }
 
 // HTTP server
 const port = process.env.PORT || 8080;
-const httpServer = http.createServer(app);
-httpServer.listen(port, () =>
-  console.log(`HTTP server is running on port ${port}`)
+// const httpServer = http.createServer(app);
+const httpsServer = https.createServer(options, app);
+// httpServer.listen(port, () =>
+//   console.log(`HTTP server is running on port ${port}`)
+// );
+httpsServer.listen(port, () =>
+  console.log(`HTTPS server is running on port ${port}`)
 );
 
 // Chat server
-const io = new SocketIOServer(httpServer);
+// const io = new SocketIOServer(httpServer);
+const io = new SocketIOServer(httpsServer);
 let chatRooms = {};
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
