@@ -36,3 +36,5 @@ app.yaml
 
 /backend/uploads/
 /backend/ignore/
+
+ssl/

@@ -27,7 +27,7 @@ const GoogleSignIn = () => {
 
       if (res.ok) {
         const newUser = await res.json();
-        console.log("New user:", newUser);
+        // console.log("New user:", newUser);
         setUser(newUser);
         navigate("/projects");
       } else {
@@ -42,7 +42,7 @@ const GoogleSignIn = () => {
     if (window.google && window.google.accounts) {
       window.google.accounts.id.initialize({
         client_id:
-          "921854374603-me6ko0fch21vb5t8i0vch7gh9bkcgrcg.apps.googleusercontent.com",
+          "504287112333-gbmjfmf6oejadvgo4jbb80odvmirdcek.apps.googleusercontent.com",
         callback: handleCallbackResponse,
       });
 
