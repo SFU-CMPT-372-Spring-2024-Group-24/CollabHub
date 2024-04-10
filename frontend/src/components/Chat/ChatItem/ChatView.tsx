@@ -158,7 +158,7 @@ const ChatView = ({ chat }: Props) => {
                     {user.id !== message.User.id && (
                       <>
                         <Tooltip
-                          id="tooltip"
+                          id={`tooltip-${index}`}
                           content={`${message.User.name}`}
                         ></Tooltip>
                         <img
@@ -166,7 +166,7 @@ const ChatView = ({ chat }: Props) => {
                             message.User.profilePicture || defaultProfilePicture
                           }`}
                           alt="User Avatar"
-                          data-tooltip-id="tooltip"
+                          data-tooltip-id={`tooltip-${index}`}
                         />
                       </>
                     )}
