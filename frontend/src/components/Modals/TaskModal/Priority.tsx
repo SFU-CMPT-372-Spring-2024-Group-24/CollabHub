@@ -62,7 +62,7 @@ const Priority = ({ task }: Props) => {
       });
 
       // ???
-      task.priority = response.data.priority;
+      // task.priority = response.data.priority;
 
       setTask({ ...task, priority: response.data.priority });
       setPriorityValue(response.data.priority);
@@ -92,7 +92,7 @@ const Priority = ({ task }: Props) => {
           </span>
         )}
 
-        {task.priority === "unset" && userCanPerform("manageTasks") && (
+        {!task.priority && userCanPerform("manageTasks") && (
           <button className="set-priority" onClick={togglePriorityModal}>
             Set priority
           </button>
