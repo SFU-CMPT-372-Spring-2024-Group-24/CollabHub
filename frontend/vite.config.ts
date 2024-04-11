@@ -8,7 +8,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       "/api": {
-        target: "http://localhost:8080/api",
+        target: "http://localhost:8443/api",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
@@ -17,5 +17,5 @@ export default defineConfig({
   build: {
     outDir: "../backend/dist",
     emptyOutDir: true,
-  }
+  },
 });

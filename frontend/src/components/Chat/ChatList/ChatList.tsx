@@ -21,10 +21,9 @@ const ChatList = () => {
   const { user } = useUser();
   if (!user) return null;
 
-  const { showChat, setShowChat, showChatItem, setShowChatItem, chats } =
-    useChats();
+  const { showChat, setShowChat, chats } = useChats();
 
-  // const [showChatItem, setShowChatItem] = useState<boolean>(false);
+  const [showChatItem, setShowChatItem] = useState<boolean>(false);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [showManageChatModal, setShowManageChatModal] =
     useState<boolean>(false);

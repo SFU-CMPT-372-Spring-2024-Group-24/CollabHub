@@ -1,6 +1,7 @@
 // Hooks
 import { useState } from "react";
 import { useUser } from "../../../hooks/UserContext";
+import { useChats } from "../../../hooks/ChatContext";
 // Icons and styles
 import { IoSettingsOutline } from "react-icons/io5";
 import { IoIosArrowDropleft } from "react-icons/io";
@@ -13,13 +14,15 @@ import ChatView from "./ChatView";
 import SettingsView from "./SettingsView";
 
 interface Props {
-  setShowChatItem: (showChatItem: boolean) => void;
   chat: Chat | null;
   setChat: (chat: Chat) => void;
+  setShowChatItem: (value: boolean) => void;
 }
 
 function ChatItem({ setShowChatItem, chat, setChat }: Props) {
   const { user } = useUser();
+  // const { showChatItem, setShowChatItem } = useChats();
+
   if (!chat || !user) {
     return null;
   }

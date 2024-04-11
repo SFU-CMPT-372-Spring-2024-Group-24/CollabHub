@@ -18,12 +18,12 @@ import { useUser } from "./UserContext";
 import { useApiErrorHandler } from "./useApiErrorHandler";
 
 // Socket
-// export const socket = io("http://localhost:8080", {
-//   transports: ["websocket"],
-// });
+export const socket = io("http://localhost:8443", {
+  transports: ["websocket"],
+});
 
 // Setup for deployment
-export const socket = io();
+// export const socket = io();
 
 socket.on("connect", () => {
   // console.log("Connected to socket server");
@@ -36,8 +36,8 @@ interface ChatContextType {
   socket: Socket;
   showChat: boolean;
   setShowChat: (value: boolean) => void;
-  showChatItem: boolean;
-  setShowChatItem: (value: boolean) => void;
+  // showChatItem: boolean;
+  // setShowChatItem: (value: boolean) => void;
 }
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
@@ -58,8 +58,8 @@ export const ChatProvider = ({ children }: Props) => {
   const [chats, setChats] = useState<Chat[]>([]);
   const { handleApiError } = useApiErrorHandler();
   const [showChat, setShowChat] = useState<boolean>(false);
-  const [showChatItem, setShowChatItem] = useState<boolean>(false);
-  // Fetch chats for the user
+  // const [showChatItem, setShowChatItem] = useState<boolean>(false);
+  // Fetch chats for the
   useEffect(() => {
     const getRecentChats = async () => {
       if (!user) return;
@@ -113,8 +113,8 @@ export const ChatProvider = ({ children }: Props) => {
         socket,
         showChat,
         setShowChat,
-        showChatItem,
-        setShowChatItem,
+        // showChatItem,
+        // setShowChatItem,
       }}
     >
       {children}

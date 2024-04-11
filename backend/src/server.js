@@ -40,7 +40,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       sameSite: "lax",
-      secure: true,
+      secure: false,
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
     },
@@ -49,7 +49,7 @@ app.use(
 
 // Serve React app (for production)
 // if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../dist")));
+app.use(express.static(path.join(__dirname, "../dist")));
 // }
 
 // Static files (for testing)
@@ -98,25 +98,25 @@ app.use("/api/roles", require("./routes/roles"));
 
 // Catch-all route
 // if (process.env.NODE_ENV === "production") {
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../dist", "index.html"));
-  });
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../dist", "index.html"));
+});
 // }
 
 // HTTP server
 const port = process.env.PORT || 8080;
-// const httpServer = http.createServer(app);
-const httpsServer = https.createServer(options, app);
-// httpServer.listen(port, () =>
-//   console.log(`HTTP server is running on port ${port}`)
-// );
-httpsServer.listen(port, () =>
-  console.log(`HTTPS server is running on port ${port}`)
+const httpServer = http.createServer(app);
+// const httpsServer = https.createServer(options, app);
+httpServer.listen(port, () =>
+  console.log(`HTTP server is running on port ${port}`)
 );
+// httpsServer.listen(port, () =>
+//   console.log(`HTTPS server is running on port ${port}`)
+// );
 
 // Chat server
-// const io = new SocketIOServer(httpServer);
-const io = new SocketIOServer(httpsServer);
+const io = new SocketIOServer(httpServer);
+// const io = new SocketIOServer(httpsServer);
 let chatRooms = {};
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
@@ -132,8 +132,8 @@ io.on("connection", (socket) => {
   });
 
   // Leave room
-  socket.on('leave_room', (roomId) => {
-    chatRooms[roomId] = chatRooms[roomId].filter(id => id !== socket.id);
+  socket.on("leave_room", (roomId) => {
+    chatRooms[roomId] = chatRooms[roomId].filter((id) => id !== socket.id);
     socket.leave(roomId);
   });
 
@@ -148,7 +148,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("User Disconnected", socket.id);
     for (let roomId in chatRooms) {
-      chatRooms[roomId] = chatRooms[roomId].filter(id => id !== socket.id);
+      chatRooms[roomId] = chatRooms[roomId].filter((id) => id !== socket.id);
     }
   });
 });
