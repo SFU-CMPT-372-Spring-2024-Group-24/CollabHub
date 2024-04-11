@@ -1,7 +1,6 @@
 // Hooks
 import { useState } from "react";
 import { useUser } from "../../../hooks/UserContext";
-import { useChats } from "../../../hooks/ChatContext";
 // Icons and styles
 import { IoSettingsOutline } from "react-icons/io5";
 import { IoIosArrowDropleft } from "react-icons/io";
