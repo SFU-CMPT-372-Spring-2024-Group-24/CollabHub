@@ -5,7 +5,9 @@ const fs = require("fs");
 const path = require("path");
 
 // Third-party modules
-require("dotenv").config();
+require("dotenv").config({
+  path: `.env.${process.env.NODE_ENV}`,
+});
 const express = require("express");
 const session = require("express-session");
 const cors = require("cors");
@@ -23,13 +25,36 @@ app.use(express.urlencoded({ extended: true }));
 // Trust the first proxy when running in production on App Engine
 // app.set("trust proxy", 1);
 
-// HTTPS options
-const options = {
-  key: fs.readFileSync(path.join(__dirname, "../ssl", "key.pem")),
-  cert: fs.readFileSync(path.join(__dirname, "../ssl", "cert.pem")),
-  // requestCert: false,
-  // rejectUnauthorized: false,
-};
+let server;
+const port = process.env.PORT || 8080;
+if (process.env.NODE_ENV === "production") {
+  // HTTPS options
+  const options = {
+    key: fs.readFileSync(path.join(__dirname, "../ssl", "key.pem")),
+    cert: fs.readFileSync(path.join(__dirname, "../ssl", "cert.pem")),
+    // requestCert: false,
+    // rejectUnauthorized: false,
+  };
+  // HTTPS server
+  // const httpsServer = https.createServer(options, app);
+  // httpsServer.listen(port, () =>
+  //   console.log(`HTTPS server is running on port ${port}`)
+  // );
+  server = https.createServer(options, app);
+  server.listen(port, () =>
+    console.log(`HTTPS server is running on port ${port}`)
+  );
+} else {
+  // HTTP server
+  // const httpServer = http.createServer(app);
+  // httpServer.listen(port, () =>
+  //   console.log(`HTTP server is running on port ${port}`)
+  // );
+  server = http.createServer(app);
+  server.listen(port, () =>
+    console.log(`HTTP server is running on port ${port}`)
+  );
+}
 
 // Session
 app.use(
@@ -40,7 +65,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       sameSite: "lax",
-      secure: false,
+      // secure: true,
+      secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
     },
@@ -48,9 +74,9 @@ app.use(
 );
 
 // Serve React app (for production)
-// if (process.env.NODE_ENV === "production") {
-app.use(express.static(path.join(__dirname, "../dist")));
-// }
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../dist")));
+}
 
 // Static files (for testing)
 app.use("/test", express.static(path.join(__dirname, "./test.local")));
@@ -97,26 +123,14 @@ app.use("/api/comments", require("./routes/comments"));
 app.use("/api/roles", require("./routes/roles"));
 
 // Catch-all route
-// if (process.env.NODE_ENV === "production") {
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../dist", "index.html"));
-});
-// }
-
-// HTTP server
-const port = process.env.PORT || 8080;
-const httpServer = http.createServer(app);
-// const httpsServer = https.createServer(options, app);
-httpServer.listen(port, () =>
-  console.log(`HTTP server is running on port ${port}`)
-);
-// httpsServer.listen(port, () =>
-//   console.log(`HTTPS server is running on port ${port}`)
-// );
+if (process.env.NODE_ENV === "production") {
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../dist", "index.html"));
+  });
+}
 
 // Chat server
-const io = new SocketIOServer(httpServer);
-// const io = new SocketIOServer(httpsServer);
+const io = new SocketIOServer(server);
 let chatRooms = {};
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);

@@ -92,7 +92,7 @@ const Priority = ({ task }: Props) => {
           </span>
         )}
 
-        {!task.priority && userCanPerform("manageTasks") && (
+        {(!task.priority || task.priority === 'unset') && userCanPerform("manageTasks") && (
           <button className="set-priority" onClick={togglePriorityModal}>
             Set priority
           </button>

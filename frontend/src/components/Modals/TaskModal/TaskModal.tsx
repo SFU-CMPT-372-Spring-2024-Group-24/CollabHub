@@ -69,7 +69,7 @@ const TaskModal = ({ isShowing, setIsShowing, task }: Props) => {
           <span
             className={`
                 list-name 
-                ${task.priority && "hasPriority"}
+                ${task.priority && task.priority !== 'unset' && "hasPriority"}
                 ${userCanPerform("manageTasks") && "hasPriority"}
               `}
           >
