@@ -31,9 +31,11 @@ interface Props {
   action: string;
   chat?: Chat;
   setChat?: (chat: Chat) => void;
+  setShowChatItem: (value: boolean) => void;
 }
 
 const ManageChatModal = ({
+  setShowChatItem,
   showModal,
   setShowModal,
   action,
@@ -42,7 +44,7 @@ const ManageChatModal = ({
 }: Props) => {
   const { user } = useUser();
   const [chatName, setChatName] = useState<string>("");
-  const { socket, chats, setChats, setShowChatItem } = useChats();
+  const { socket, chats, setChats } = useChats();
   const { handleApiError } = useApiErrorHandler();
   const [confirmMsg, setConfirmMsg] = useState<string>("");
   const [confirmText, setConfirmText] = useState<string>("");

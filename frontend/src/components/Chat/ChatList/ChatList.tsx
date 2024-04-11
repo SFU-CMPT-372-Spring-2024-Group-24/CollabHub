@@ -151,6 +151,7 @@ const ChatList = () => {
       )}
 
       <ManageChatModal
+        setShowChatItem={setShowChatItem}
         showModal={showManageChatModal}
         setShowModal={() => setShowManageChatModal(false)}
         action="create-chat"

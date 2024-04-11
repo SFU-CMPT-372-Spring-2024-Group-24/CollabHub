@@ -18,7 +18,7 @@ import { useUser } from "./UserContext";
 import { useApiErrorHandler } from "./useApiErrorHandler";
 
 // Socket
-export const socket = io("http://localhost:8443", {
+export const socket = io("http://localhost:8080", {
   transports: ["websocket"],
 });
 

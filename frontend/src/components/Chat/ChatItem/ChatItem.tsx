@@ -16,6 +16,7 @@ import SettingsView from "./SettingsView";
 interface Props {
   chat: Chat | null;
   setChat: (chat: Chat) => void;
+  // showChatItem: boolean;
   setShowChatItem: (value: boolean) => void;
 }
 
@@ -79,7 +80,11 @@ function ChatItem({ setShowChatItem, chat, setChat }: Props) {
 
         {/* Chat Settings */}
         {view === "chatSettings" && (
-          <SettingsView chat={chat} setChat={setChat} />
+          <SettingsView
+            setShowChatItem={setShowChatItem}
+            chat={chat}
+            setChat={setChat}
+          />
         )}
       </div>
     </>

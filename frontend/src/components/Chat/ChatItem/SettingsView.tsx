@@ -19,9 +19,10 @@ import { Link } from "react-router-dom";
 interface Props {
   chat: Chat;
   setChat: (chat: Chat) => void;
+  setShowChatItem: (value: boolean) => void;
 }
 
-const SettingsView = ({ chat, setChat }: Props) => {
+const SettingsView = ({ setShowChatItem, chat, setChat }: Props) => {
   const { handleApiError } = useApiErrorHandler();
   const [showManageChatModal, setShowManageChatModal] =
     useState<boolean>(false);
@@ -111,6 +112,7 @@ const SettingsView = ({ chat, setChat }: Props) => {
       </section>
 
       <ManageChatModal
+        setShowChatItem={setShowChatItem}
         showModal={showManageChatModal}
         setShowModal={setShowManageChatModal}
         action="add-members"
