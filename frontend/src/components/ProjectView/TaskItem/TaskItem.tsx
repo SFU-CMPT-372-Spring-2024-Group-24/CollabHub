@@ -18,7 +18,7 @@ interface Props {
   index: number;
 }
 
-const TaskItem = ({ task, index }: Props) => {
+const TaskItem = ({ list, task, index }: Props) => {
   // Task Item Modal
   const [showTaskItemModal, setShowTaskItemModal] = useState<boolean>(false);
 
@@ -62,6 +62,8 @@ const TaskItem = ({ task, index }: Props) => {
         isShowing={showTaskItemModal}
         setIsShowing={setShowTaskItemModal}
         task={task}
+        list={list}
+        index={index}
       />
     </>
   );

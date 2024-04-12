@@ -16,7 +16,7 @@ import MoveTaskModal from "../../Modals/MoveTask/MoveTaskModal";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 // Models
 import { Task } from "../../../models/Task";
-// import { List } from "../../../models/List";
+import { List } from "../../../models/List";
 // Icons
 import { IoMdClose, IoMdTrash } from "react-icons/io";
 import { TbArrowsExchange } from "react-icons/tb";
@@ -27,9 +27,11 @@ interface Props {
   isShowing: boolean;
   setIsShowing: (show: boolean) => void;
   task: Task;
+  list?: List;
+  index?: number;
 }
 
-const TaskModal = ({ isShowing, setIsShowing, task }: Props) => {
+const TaskModal = ({ isShowing, setIsShowing, task, list, index }: Props) => {
   if (!task) return null;
 
   const { handleApiError } = useApiErrorHandler();
@@ -37,8 +39,26 @@ const TaskModal = ({ isShowing, setIsShowing, task }: Props) => {
   const [isShowingMoveTaskModal, setIsShowingMoveTaskModal] = useState<boolean>(false);
   const [isShowingConfirmationModal, setIsShowingConfirmationModal] = useState<boolean>(false);
 
-  const list = lists.find((list) => list.id === task.listId)!;
-  const index = list.tasks.findIndex((t) => t.id === task.id);
+  // For the case when the task is opened from the search bar
+  const findTaskInLists = (taskId: number) => {
+    for (const list of lists) {
+      const index = list.tasks.findIndex((t) => t.id === taskId);
+      if (index !== -1) {
+        return { list, index };
+      }
+    }
+    return null;
+  };
+
+  if (!list || index === undefined) {
+    const taskLocation = findTaskInLists(task.id);
+    if (taskLocation) {
+      list = taskLocation.list;
+      index = taskLocation.index;
+    } else {
+      return null;
+    }
+  }
 
   const handleDeleteTask = async () => {
     try {
