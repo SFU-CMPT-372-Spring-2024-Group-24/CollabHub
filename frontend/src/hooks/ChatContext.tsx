@@ -18,12 +18,12 @@ import { useUser } from "./UserContext";
 import { useApiErrorHandler } from "./useApiErrorHandler";
 
 // Socket
-// export const socket = io("http://localhost:8080", {
-//   transports: ["websocket"],
-// });
+export const socket = io("http://localhost:8080", {
+  transports: ["websocket"],
+});
 
 // Setup for deployment
-export const socket = io();
+// export const socket = io();
 
 socket.on("connect", () => {
   // console.log("Connected to socket server");
@@ -36,8 +36,7 @@ interface ChatContextType {
   socket: Socket;
   showChat: boolean;
   setShowChat: (value: boolean) => void;
-  showChatItem: boolean;
-  setShowChatItem: (value: boolean) => void;
+  sortChats: (chats: Chat[]) => Chat[];
 }
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
@@ -58,7 +57,7 @@ export const ChatProvider = ({ children }: Props) => {
   const [chats, setChats] = useState<Chat[]>([]);
   const { handleApiError } = useApiErrorHandler();
   const [showChat, setShowChat] = useState<boolean>(false);
-  const [showChatItem, setShowChatItem] = useState<boolean>(false);
+
   // Fetch chats for the user
   useEffect(() => {
     const getRecentChats = async () => {
@@ -66,11 +65,15 @@ export const ChatProvider = ({ children }: Props) => {
 
       try {
         const response = await api.get(`/chats`);
-        setChats(response.data);
+
         // Join chat rooms to receive messages
         response.data.forEach((chat: Chat) => {
           socket.emit("join_room", chat.id);
         });
+
+        // Sort the chats by the last message
+        const sortedChats = sortChats(response.data);
+        setChats(sortedChats);
       } catch (error) {
         handleApiError(error as AxiosError);
       }
@@ -83,7 +86,7 @@ export const ChatProvider = ({ children }: Props) => {
     };
   }, [user]);
 
-  // Listen for new messages to update the last message of a chat
+  // Listen for new messages to update the last message of a chat in the chat list
   useEffect(() => {
     const receiveMessage = (message: Message) => {
       const updatedChats = chats.map((chat) => {
@@ -96,7 +99,9 @@ export const ChatProvider = ({ children }: Props) => {
         return chat;
       });
 
-      setChats(updatedChats);
+      // Sort the chats by the last message
+      const sortedChats = sortChats(updatedChats);
+      setChats(sortedChats);
     };
     socket.on("receive_message", receiveMessage);
 
@@ -104,6 +109,21 @@ export const ChatProvider = ({ children }: Props) => {
       socket.off("receive_message", receiveMessage);
     };
   }, [chats, setChats, socket]);
+
+  // Sort the chats by the last message
+  const sortChats = (chats: Chat[]) => {
+    return [...chats].sort((a, b) => {
+      if (a.lastMessage && b.lastMessage) {
+        return new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime();
+      } else if (a.lastMessage) {
+        return -1;
+      } else if (b.lastMessage) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+  };
 
   return (
     <ChatContext.Provider
@@ -113,8 +133,7 @@ export const ChatProvider = ({ children }: Props) => {
         socket,
         showChat,
         setShowChat,
-        showChatItem,
-        setShowChatItem,
+        sortChats,
       }}
     >
       {children}

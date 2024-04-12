@@ -79,7 +79,7 @@ File.belongsToMany(Project, { through: 'ProjectFile' });
 
 (async () => {
     await sequelize.sync({
-        alter: true,
+        // alter: true,
         logging: false
     });
 

@@ -66,7 +66,6 @@ function ChatItem({ setShowChatItem, chat, setChat }: Props) {
             type="button"
             className={`btn-icon ${view === "chatSettings" ? "active" : ""}`}
             onClick={() => setView("chatSettings")}
-            // onClick={chatSettingsCheck}
           >
             <IoSettingsOutline size={18} />
           </button>
