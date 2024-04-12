@@ -9,12 +9,18 @@ import { api, AxiosError } from "../../../api";
 import { useApiErrorHandler } from "../../../hooks/useApiErrorHandler";
 import { useState } from "react";
 import { useChats } from "../../../hooks/ChatContext";
+import { useUser } from "../../../hooks/UserContext";
 // Icons
-import { IoMdAdd } from "react-icons/io";
-// import { RiLogoutCircleRLine } from "react-icons/ri";
+import { IoMdAdd, IoMdTrash } from "react-icons/io";
+import { RiLogoutCircleRLine } from "react-icons/ri";
 // Components
 import ManageChatModal from "../../Modals/ManageChat/ManageChatModal";
+import ConfirmationModal from "../../Modals/ConfirmationModal/ConfirmationModal";
+// Libraries
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import { FiEdit2 } from "react-icons/fi";
+import Modal from "react-bootstrap/Modal";
 
 interface Props {
   chat: Chat;
@@ -25,7 +31,14 @@ const SettingsView = ({ chat, setChat }: Props) => {
   const { handleApiError } = useApiErrorHandler();
   const [showManageChatModal, setShowManageChatModal] =
     useState<boolean>(false);
-  const { socket, chats: globalChats, setChats: setGlobalChats } = useChats();
+  const { socket, chats, setChats, setShowChatItem } = useChats();
+  const [confirmMsg, setConfirmMsg] = useState<string>("");
+  const [confirmText, setConfirmText] = useState<string>("");
+  const [showConfirmationModal, setShowConfirmationModal] =
+    useState<boolean>(false);
+  const { user } = useUser();
+  const [chatName, setChatName] = useState<string>("");
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   // Remove a user from the chat
   const handleRemoveUser = async (user: User) => {
@@ -35,8 +48,8 @@ const SettingsView = ({ chat, setChat }: Props) => {
         ...chat,
         Users: chat.Users.filter((u) => u.id !== user.id),
       });
-      setGlobalChats(
-        globalChats.map((myChat: Chat) => {
+      setChats(
+        chats.map((myChat: Chat) => {
           if (myChat.id == chat.id) {
             return {
               ...chat,
@@ -52,6 +65,72 @@ const SettingsView = ({ chat, setChat }: Props) => {
     }
   };
 
+  const handleDeleteChat = async () => {
+    try {
+      const response = await api.delete(`/chats/${chat!.id}/delete/`);
+      if (response.status === 200) {
+        toast.success("You have deleted the chat.");
+      }
+      setChats(chats.filter((myChat) => myChat.id !== chat!.id));
+    } catch (error) {
+      handleApiError(error as AxiosError);
+    } finally {
+      setShowConfirmationModal(false);
+      setShowChatItem(false);
+    }
+  };
+
+  const handleLeaveChat = async () => {
+    try {
+      //call api
+      const response = await api.delete(`/chats/${chat!.id}/leave/${user?.id}`);
+      if (response.status === 200) {
+        toast.success("You have left the chat.");
+        // navigate("/projects");
+      }
+      //find the chat in the list of chats, remove that specifc chat
+      setChats(chats.filter((myChat) => myChat.id !== chat!.id));
+    } catch (error) {
+      handleApiError(error as AxiosError);
+    } finally {
+      setShowConfirmationModal(false);
+      setShowChatItem(false);
+    }
+  };
+
+  const handleChatNameSubmit = async () => {
+    if (chatName.trim() === "") {
+      toast.error("Chat name cannot be empty.");
+      return;
+    }
+    try {
+      //update chat name in database
+      await api.post(`/chats/${chat!.id}/chatName`, {
+        chatName: chatName,
+      });
+
+      // Updated chat
+      const updatedChat = {
+        ...chat!,
+        name: chatName,
+      };
+
+      // Update the current chat and also the list of chats to include the new members
+      setChat!(updatedChat);
+      setChats(chats.map((c) => (c.id === chat!.id ? updatedChat : c)));
+
+      // Use socket to broadcast to everyone else to refresh their list of chats
+      socket.emit("chat_added");
+    } catch (error) {
+      handleApiError(error as AxiosError);
+    }
+  };
+
+  const closeModal = () => {
+    setChatName("");
+    setShowModal(false);
+  };
+
   return (
     <>
       <section className="settings-view">
@@ -62,20 +141,40 @@ const SettingsView = ({ chat, setChat }: Props) => {
             className="btn-icon"
           >
             <IoMdAdd size={15} />
-            Manage Chat
-          </button>
-          {/* <button type="button" className="btn-icon" onClick={() => {}}>
-            <RiLogoutCircleRLine size={15} />
-            Leave Chat
+            Add members
           </button>
           <button
             type="button"
-            className="btn-icon btn-danger"
-            onClick={() => {}}
+            className="btn-icon"
+            onClick={() => setShowModal(true)}
           >
-            <IoMdTrash size={15} />
-            Delete Chat
-          </button> */}
+            <FiEdit2 size={12}/>
+            Change Chat Name
+          </button>
+          <button
+            type="button"
+            className="btn-icon"
+            onClick={() => {
+              setConfirmMsg("Are you sure you want to leave this chat?");
+              setConfirmText("Yes! I want to leave this chat.");
+              setShowConfirmationModal(true);
+            }}
+          >
+            <RiLogoutCircleRLine size={13} />
+            Leave this chat
+          </button>
+          <button
+            type="button"
+            className="btn-icon"
+            onClick={() => {
+              setConfirmMsg("Are you sure you want to delete this chat?");
+              setConfirmText("Yes! Delete my chat permanently.");
+              setShowConfirmationModal(true);
+            }}
+          >
+            <IoMdTrash size={13} />
+            Delete this chat
+          </button>
         </div>
 
         <div className="members">
@@ -117,6 +216,56 @@ const SettingsView = ({ chat, setChat }: Props) => {
         chat={chat}
         setChat={setChat}
       />
+
+      <ConfirmationModal
+        show={showConfirmationModal}
+        message={confirmMsg}
+        confirmText={confirmText}
+        onConfirm={
+          confirmText === "Yes! I want to leave this chat."
+            ? handleLeaveChat
+            : handleDeleteChat
+        }
+        onCancel={() => setShowConfirmationModal(false)}
+      />
+
+      <Modal
+        show={showModal}
+        onHide={closeModal}
+        dialogClassName="change-chat-name-modal"
+        backdropClassName="change-chat-name-modal-backdrop"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Enter new chat name</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <input
+            id="chatName"
+            name="chatName"
+            type="text"
+            value={chatName}
+            onChange={(e) => setChatName(e.target.value)}
+            autoFocus
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <button
+            type="button"
+            className="btn-cancel"
+            onClick={closeModal}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn-text"
+            onClick={handleChatNameSubmit}
+          >
+            Save changes
+          </button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

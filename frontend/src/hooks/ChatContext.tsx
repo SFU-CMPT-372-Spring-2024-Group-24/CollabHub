@@ -113,20 +113,7 @@ export const ChatProvider = ({ children }: Props) => {
     };
   }, [chats, setChats, socket]);
 
-  // Sort the chats by the last message
-  // const sortChats = (chats: Chat[]) => {
-  //   return [...chats].sort((a, b) => {
-  //     if (a.lastMessage && b.lastMessage) {
-  //       return new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime();
-  //     } else if (a.lastMessage) {
-  //       return -1;
-  //     } else if (b.lastMessage) {
-  //       return 1;
-  //     } else {
-  //       return 0;
-  //     }
-  //   });
-  // };
+  // Sort the chats by the last message, if there is no last message, use the chat creation date
   const sortChats = (chats: Chat[]) => {
     return [...chats].sort((a, b) => {
       const aDate = a.lastMessage ? new Date(a.lastMessage.createdAt) : new Date(a.createdAt);

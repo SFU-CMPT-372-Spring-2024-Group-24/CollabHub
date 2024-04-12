@@ -1,29 +1,23 @@
 // Use for creating a new chat room, or adding users to a chat room
 
 // Hooks
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useUser } from "../../../hooks/UserContext";
 import { useApiErrorHandler } from "../../../hooks/useApiErrorHandler";
 import useSearchUsers from "../../../hooks/useSearchUsers";
 import { useChats } from "../../../hooks/ChatContext";
-import { useNavigate } from "react-router-dom";
 // Libraries
 import Modal from "react-bootstrap/Modal";
-import { toast } from "react-toastify";
 // Models
 import { Chat } from "../../../models/Chat";
 // API
 import { api, AxiosError } from "../../../api";
 // Icons and styles
 import { IoSearch } from "react-icons/io5";
-import { IoMdAdd, IoMdTrash } from "react-icons/io";
+import { IoMdAdd } from "react-icons/io";
 import { FaCheck } from "react-icons/fa6";
-import "react-toastify/dist/ReactToastify.css";
 // Files
 import defaultProfilePicture from "../../../assets/default-profile-picture.png";
-import { BiLogOutCircle } from "react-icons/bi";
-//Components
-import ConfirmationModal from "../../Modals/ConfirmationModal/ConfirmationModal";
 
 interface Props {
   showModal: boolean;
@@ -42,12 +36,8 @@ const ManageChatModal = ({
 }: Props) => {
   const { user } = useUser();
   const [chatName, setChatName] = useState<string>("");
-  const { socket, chats, setChats, setShowChatItem, sortChats } = useChats();
+  const { socket, chats, setChats } = useChats();
   const { handleApiError } = useApiErrorHandler();
-  const [confirmMsg, setConfirmMsg] = useState<string>("");
-  const [confirmText, setConfirmText] = useState<string>("");
-  const [showConfirmationModal, setShowConfirmationModal] =
-    useState<boolean>(false);
   const {
     query,
     setQuery,
@@ -76,84 +66,19 @@ const ManageChatModal = ({
     setSearched(false);
   };
 
-  const navigate = useNavigate();
-  // if there's only one selected user, make the chat name their name
-  useEffect(() => {
-    //if we're creating a chat, there is no initial chat
-    // if (action == "create-chat") {
-    //   if (selectedUsers.length === 1) {
-    //     setChatName(selectedUsers[0].name);
-    //   } else {
-    //     setChatName("");
-    //   }
-    // }
-    //if we're adding member to the chat, there is a chat, so we can use that
-    if (action == "add-members") {
-      //one situation is where you removed some people in chat and then add more people again
-      //the default chat name shouldn't change,, it should still be the same as before
-      if (
-        selectedUsers.length == 1 &&
-        chat!.Users.length + selectedUsers.length == 1
-      ) {
-        setChatName(selectedUsers[0].name);
-      } else {
-        setChatName(chat!.name);
-      }
-    }
-  }, [selectedUsers, chat?.Users]);
-
-  const handleDeleteChat = async () => {
-    try {
-      const response = await api.delete(`/chats/${chat!.id}/delete/`);
-      if (response.status === 200) {
-        toast("You have deleted the chat.");
-      }
-      setChats(chats.filter((myChat) => myChat.id !== chat!.id));
-    } catch (error) {
-      handleApiError(error as AxiosError);
-    } finally {
-      setShowConfirmationModal(false);
-      closeModal();
-      setShowChatItem(false);
-    }
-  };
-  const handleLeaveChat = async () => {
-    try {
-      //call api
-      const response = await api.delete(`/chats/${chat!.id}/leave/${user?.id}`);
-      if (response.status === 200) {
-        toast("You have left the chat.");
-        navigate("/projects");
-      }
-      //find the chat in the list of chats, remove that specifc chat
-      setChats(chats.filter((myChat) => myChat.id !== chat!.id));
-    } catch (error) {
-      handleApiError(error as AxiosError);
-    } finally {
-      setShowConfirmationModal(false);
-      closeModal();
-      setShowChatItem(false);
-    }
-  };
   // Create a new chat room
   const handleCreateChat = async () => {
     if (!selectedUsers.length) {
       return;
     }
-    // console.log("Value is: ", chat?.Users.length);
-    // if (chatName.trim() === "") {
-    //   alert("Please re-enter your group chat name, it is empty.");
-    //   return;
-    // }
+
     try {
-      //instead of name being empty string here, want to get name specified by a user input
       const response = await api.post("/chats", {
         name: chatName,
         userIds: [user!.id, ...selectedUsers.map((user) => user.id)],
       });
 
       // Update the state by putting the new chat at the top of the list
-      // setChats([...chats, response.data]);
       setChats([response.data, ...chats]);
 
       // Use socket to broadcast to everyone else to refresh their list of chats
@@ -184,33 +109,6 @@ const ManageChatModal = ({
       const updatedChat = {
         ...chat!,
         Users: [...chat!.Users, ...selectedUsers],
-      };
-
-      // Update the current chat and also the list of chats to include the new members
-      setChat!(updatedChat);
-      setChats(chats.map((c) => (c.id === chat!.id ? updatedChat : c)));
-
-      // Use socket to broadcast to everyone else to refresh their list of chats
-      socket.emit("chat_added");
-    } catch (error) {
-      handleApiError(error as AxiosError);
-    }
-  };
-  const handleChatNameSubmit = async () => {
-    if (chatName.trim() === "") {
-      alert("Please re-enter your group chat name, it is empty.");
-      return;
-    }
-    try {
-      //update chat name in database
-      await api.post(`/chats/${chat!.id}/chatName`, {
-        chatName: chatName,
-      });
-
-      // Updated chat
-      const updatedChat = {
-        ...chat!,
-        name: chatName,
       };
 
       // Update the current chat and also the list of chats to include the new members
@@ -267,17 +165,11 @@ const ManageChatModal = ({
                           placeholder="Input your chat name"
                           required
                         />
-                        <button
-                          type="button"
-                          className="btn-icon"
-                          onClick={handleChatNameSubmit}
-                        >
-                          Change Chat Name
-                        </button>
                       </>
                     )}
                 </>
               )}
+
               <form
                 className="search-member"
                 onSubmit={(e) => handleSearch(e, excludeIds)}
@@ -339,35 +231,6 @@ const ManageChatModal = ({
 
         <Modal.Footer>
           <div className="button-group">
-            {action === "add-members" && (
-              <>
-                <button
-                  type="button"
-                  className="btn-leave-delete-project"
-                  onClick={() => {
-                    setConfirmMsg("Are you sure you want to delete this chat?");
-                    setConfirmText("Yes! Delete my chat permanently.");
-                    setShowConfirmationModal(true);
-                  }}
-                >
-                  <IoMdTrash size={18} />
-                  Delete this chat
-                </button>
-                <button
-                  type="button"
-                  className="btn-leave-delete-project"
-                  onClick={() => {
-                    setConfirmMsg("Are you sure you want to leave this chat?");
-                    setConfirmText("Yes! I want to leave this chat.");
-                    setShowConfirmationModal(true);
-                  }}
-                >
-                  <BiLogOutCircle size={18} />
-                  Leave this chat
-                </button>
-              </>
-            )}
-
             <button type="button" className="btn-cancel" onClick={closeModal}>
               Close
             </button>
@@ -394,17 +257,6 @@ const ManageChatModal = ({
           </div>
         </Modal.Footer>
       </Modal>
-      <ConfirmationModal
-        show={showConfirmationModal}
-        message={confirmMsg}
-        confirmText={confirmText}
-        onConfirm={
-          confirmText === "Yes! I want to leave this chat."
-            ? handleLeaveChat
-            : handleDeleteChat
-        }
-        onCancel={() => setShowConfirmationModal(false)}
-      />
     </>
   );
 };
