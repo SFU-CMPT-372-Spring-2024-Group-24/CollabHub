@@ -84,6 +84,9 @@ const ManageChatModal = ({
       // Use socket to broadcast to everyone else to refresh their list of chats
       socket.emit("new_chat");
 
+      // Join the chat room to receive messages
+      socket.emit("join_room", response.data.id);
+
       // Set chat name back to empty string
       setChatName("");
 
