@@ -142,3 +142,22 @@ div.chat-item {
     }
   }
 }
+
+.change-chat-name-modal-backdrop {
+  opacity: 0 !important;
+}
+
+.change-chat-name-modal {
+  input {
+    width: 100%;
+  }
+
+  .modal-header {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .modal-content {
+    box-shadow: 0 0 5px 0 $dark-gray;
+  }
+}

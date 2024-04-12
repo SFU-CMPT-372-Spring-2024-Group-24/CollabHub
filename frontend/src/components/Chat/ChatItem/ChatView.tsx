@@ -22,7 +22,7 @@ const ChatView = ({ chat }: Props) => {
   const { user } = useUser();
   if (!user) return null;
 
-  const { socket, chats, setChats } = useChats();
+  const { socket, chats, setChats, sortChats } = useChats();
   const { handleApiError } = useApiErrorHandler();
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -47,36 +47,6 @@ const ChatView = ({ chat }: Props) => {
     fetchMessages();
   }, []);
 
-  const updateOrderOfChats = (data: Message) => {
-    //first check if the chat is already the first item
-    if (data.chatId !== chats[0].id) {
-      //filter the chats to exclude the current chat and store it in updatedChats
-      const updatedChats = chats.filter(
-        (myChat: Chat) => myChat.id !== data.chatId
-      );
-
-      //in our old chats, find the index of our current chat
-      const chatIndex: number = chats.findIndex(
-        (chatItem) => chatItem.id === data.chatId
-      );
-
-      //update our chat with the newest message, and move it to the top of the list
-      if (chatIndex != -1) {
-        let updatedChat: Chat = { ...chats[chatIndex], lastMessage: data };
-        updatedChats.unshift(updatedChat);
-        setChats(updatedChats);
-      }
-    } else {
-      //if it is the first item, don't need to change the order, just update the list
-      const updatedChats = chats.map((chatItem) => {
-        if (chatItem.id === data.chatId) {
-          return { ...chatItem, lastMessage: data };
-        }
-        return chatItem;
-      });
-      setChats(updatedChats);
-    }
-  };
   // Add a new message to the chat
   const handleAddMessage = async () => {
     try {
@@ -101,7 +71,17 @@ const ChatView = ({ chat }: Props) => {
       // Emit message to socket server
       socket.emit("send_message", data);
 
-      updateOrderOfChats(data);
+      // Update last message of the chat
+      const updatedChats = chats.map((chatItem) => {
+        if (chatItem.id === data.chatId) {
+          return { ...chatItem, lastMessage: data };
+        }
+        return chatItem;
+      });
+
+      // Sort the chats in ChatList by the last message
+      const sortedChats = sortChats(updatedChats);
+      setChats(sortedChats);
 
       // Update message list
       setMessages([...messages, data]);
@@ -113,12 +93,10 @@ const ChatView = ({ chat }: Props) => {
     }
   };
 
-  // Listen for new messages and update the chat view
+  // Listen for new messages and update the chat view (messages list of the current chat)
   useEffect(() => {
     const receiveMessage = (newMessage: Message) => {
-      updateOrderOfChats(newMessage);
       setMessages((list) => [...list, newMessage]);
-      //
     };
     socket.on("receive_message", receiveMessage);
     return () => {

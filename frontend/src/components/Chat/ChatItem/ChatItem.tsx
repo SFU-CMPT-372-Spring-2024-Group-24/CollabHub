@@ -13,16 +13,13 @@ import ChatView from "./ChatView";
 import SettingsView from "./SettingsView";
 
 interface Props {
+  setShowChatItem: (showChatItem: boolean) => void;
   chat: Chat | null;
   setChat: (chat: Chat) => void;
-  // showChatItem: boolean;
-  setShowChatItem: (value: boolean) => void;
 }
 
 function ChatItem({ setShowChatItem, chat, setChat }: Props) {
   const { user } = useUser();
-  // const { showChatItem, setShowChatItem } = useChats();
-
   if (!chat || !user) {
     return null;
   }
@@ -69,7 +66,6 @@ function ChatItem({ setShowChatItem, chat, setChat }: Props) {
             type="button"
             className={`btn-icon ${view === "chatSettings" ? "active" : ""}`}
             onClick={() => setView("chatSettings")}
-            // onClick={chatSettingsCheck}
           >
             <IoSettingsOutline size={18} />
           </button>
@@ -79,11 +75,7 @@ function ChatItem({ setShowChatItem, chat, setChat }: Props) {
 
         {/* Chat Settings */}
         {view === "chatSettings" && (
-          <SettingsView
-            setShowChatItem={setShowChatItem}
-            chat={chat}
-            setChat={setChat}
-          />
+          <SettingsView chat={chat} setChat={setChat} />
         )}
       </div>
     </>

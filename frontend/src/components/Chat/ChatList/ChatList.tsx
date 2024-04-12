@@ -13,20 +13,15 @@ import { useChats } from "../../../hooks/ChatContext";
 // Models
 import { Chat } from "../../../models/Chat";
 
-// interface Props {
-//   showChat: boolean;
-//   setShowChat: (showChat: boolean) => void;
-// }
 const ChatList = () => {
   const { user } = useUser();
-  if (!user) return null;
-
-  const { showChat, setShowChat, chats } = useChats();
-
-  const [showChatItem, setShowChatItem] = useState<boolean>(false);
+  const { showChat, setShowChat, showChatItem, setShowChatItem, chats } = useChats();
+  // const [showChatItem, setShowChatItem] = useState<boolean>(false);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [showManageChatModal, setShowManageChatModal] =
     useState<boolean>(false);
+
+  if (!user) return null;
 
   // Handle viewing a chat
   const handleViewChat = (chat: Chat) => {
@@ -151,7 +146,6 @@ const ChatList = () => {
       )}
 
       <ManageChatModal
-        setShowChatItem={setShowChatItem}
         showModal={showManageChatModal}
         setShowModal={() => setShowManageChatModal(false)}
         action="create-chat"

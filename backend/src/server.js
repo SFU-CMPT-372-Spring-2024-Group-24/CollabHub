@@ -146,13 +146,17 @@ io.on("connection", (socket) => {
   });
 
   // Leave room
-  socket.on("leave_room", (roomId) => {
-    chatRooms[roomId] = chatRooms[roomId].filter((id) => id !== socket.id);
+  socket.on('leave_room', (roomId) => {
+    chatRooms[roomId] = chatRooms[roomId].filter(id => id !== socket.id);
     socket.leave(roomId);
   });
 
-  socket.on("chat_added", () => {
-    socket.broadcast.emit("refresh_user_list");
+  socket.on("new_chat", () => {
+    socket.broadcast.emit("refresh_chats");
+  });
+
+  socket.on("chat_updated", () => {
+    socket.broadcast.emit("refresh_chats");
   });
 
   socket.on("send_message", (message) => {
@@ -162,7 +166,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("User Disconnected", socket.id);
     for (let roomId in chatRooms) {
-      chatRooms[roomId] = chatRooms[roomId].filter((id) => id !== socket.id);
+      chatRooms[roomId] = chatRooms[roomId].filter(id => id !== socket.id);
     }
   });
 });
