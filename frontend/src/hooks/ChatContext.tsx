@@ -18,12 +18,14 @@ import { useUser } from "./UserContext";
 import { useApiErrorHandler } from "./useApiErrorHandler";
 
 // Socket
-export const socket = io("http://localhost:8080", {
-  transports: ["websocket"],
-});
+// export const socket = io("http://localhost:8080", {
+//   transports: ["websocket"],
+// });
 
 // Setup for deployment
-// export const socket = io();
+export const socket = io({
+  transports: ["websocket"],
+});
 
 socket.on("connect", () => {
   // console.log("Connected to socket server");
