@@ -120,6 +120,9 @@ const ManageChatModal = ({
 
       // Use socket to broadcast to everyone else to refresh their list of chats
       socket.emit("new_chat");
+
+      // Close the modal
+      closeModal();
     } catch (error) {
       handleApiError(error as AxiosError);
     }
@@ -155,22 +158,7 @@ const ManageChatModal = ({
               )}
 
               {action === "add-members" && (
-                <>
-                  <h5>Select users you want to add to the chat</h5>
-                  {chat != undefined &&
-                    selectedUsers.length + chat?.Users.length > 1 && (
-                      <>
-                        <input
-                          type="text"
-                          className="insert-chat-name"
-                          value={chatName}
-                          onChange={(e) => setChatName(e.target.value)}
-                          placeholder="Input your chat name"
-                          required
-                        />
-                      </>
-                    )}
-                </>
+                <h5>Select users you want to add to the chat</h5>
               )}
 
               <form

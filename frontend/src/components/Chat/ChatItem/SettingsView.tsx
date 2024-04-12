@@ -122,7 +122,8 @@ const SettingsView = ({ chat, setChat }: Props) => {
       setChats(chats.map((c) => (c.id === chat!.id ? updatedChat : c)));
 
       // Use socket to broadcast to everyone else to refresh their list of chats
-      socket.emit("chat_added");
+      socket.emit("chat_updated");
+      setShowModal(false);
     } catch (error) {
       handleApiError(error as AxiosError);
     }
@@ -248,6 +249,7 @@ const SettingsView = ({ chat, setChat }: Props) => {
             type="text"
             value={chatName}
             onChange={(e) => setChatName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleChatNameSubmit()}
             autoFocus
           />
         </Modal.Body>
