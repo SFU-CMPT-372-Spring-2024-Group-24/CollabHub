@@ -6,7 +6,6 @@ import "./Header.scss";
 import { Link } from "react-router-dom";
 // Components
 import UserModal from "../Modals/UserModal/UserModal";
-import ChatList from "../Chat/ChatList/ChatList";
 import SearchBar from "./SearchBar";
 // Hooks
 import { useChats } from "../../hooks/ChatContext";
@@ -18,7 +17,6 @@ interface Props {
 }
 
 const Header = ({ searchPlaceholder }: Props) => {
-  // const [showChat, setShowChat] = useState<boolean>(false);
   const { showChat, setShowChat } = useChats();
 
   return (
@@ -42,7 +40,6 @@ const Header = ({ searchPlaceholder }: Props) => {
 
       <UserModal />
 
-      <ChatList />
     </header>
   );
 };

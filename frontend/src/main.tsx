@@ -24,6 +24,7 @@ import LoginSignup from "./pages/SignupLoginpage/LoginSignup";
 import LandingPage from "./pages/LandingPage/LandingPage";
 import Adminpage from "./pages/AdminPage/Adminpage";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
+import ChatList from "./components/Chat/ChatList/ChatList";
 
 // Contexts
 import { UserProvider, useUser } from "./hooks/UserContext";
@@ -84,6 +85,7 @@ const App = () => {
           pauseOnHover={true}
         />
         <BrowserRouter>
+          <ChatList />
           <Routes>
             <Route element={<Layout />}>
               <Route
