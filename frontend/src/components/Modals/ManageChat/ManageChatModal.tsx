@@ -116,7 +116,7 @@ const ManageChatModal = ({
       setChats(chats.map((c) => (c.id === chat!.id ? updatedChat : c)));
 
       // Use socket to broadcast to everyone else to refresh their list of chats
-      socket.emit("chat_added");
+      socket.emit("new_chat");
     } catch (error) {
       handleApiError(error as AxiosError);
     }

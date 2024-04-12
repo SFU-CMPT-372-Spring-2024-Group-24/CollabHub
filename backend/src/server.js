@@ -155,6 +155,10 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("refresh_chats");
   });
 
+  socket.on("chat_updated", () => {
+    socket.broadcast.emit("refresh_chats");
+  });
+
   socket.on("send_message", (message) => {
     socket.to(message.chatId).emit("receive_message", message);
   });

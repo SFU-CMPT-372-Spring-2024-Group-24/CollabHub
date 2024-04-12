@@ -59,7 +59,7 @@ const SettingsView = ({ chat, setChat }: Props) => {
           return myChat;
         })
       );
-      socket.emit("chat_added");
+      socket.emit("chat_updated");
     } catch (error) {
       handleApiError(error as AxiosError);
     }
@@ -72,6 +72,7 @@ const SettingsView = ({ chat, setChat }: Props) => {
         toast.success("You have deleted the chat.");
       }
       setChats(chats.filter((myChat) => myChat.id !== chat!.id));
+      socket.emit("chat_updated");
     } catch (error) {
       handleApiError(error as AxiosError);
     } finally {
@@ -90,6 +91,7 @@ const SettingsView = ({ chat, setChat }: Props) => {
       }
       //find the chat in the list of chats, remove that specifc chat
       setChats(chats.filter((myChat) => myChat.id !== chat!.id));
+      socket.emit("chat_updated");
     } catch (error) {
       handleApiError(error as AxiosError);
     } finally {
