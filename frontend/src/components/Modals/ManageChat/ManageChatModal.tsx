@@ -42,7 +42,7 @@ const ManageChatModal = ({
 }: Props) => {
   const { user } = useUser();
   const [chatName, setChatName] = useState<string>("");
-  const { socket, chats, setChats, setShowChatItem } = useChats();
+  const { socket, chats, setChats, setShowChatItem, sortChats } = useChats();
   const { handleApiError } = useApiErrorHandler();
   const [confirmMsg, setConfirmMsg] = useState<string>("");
   const [confirmText, setConfirmText] = useState<string>("");
@@ -152,11 +152,12 @@ const ManageChatModal = ({
         userIds: [user!.id, ...selectedUsers.map((user) => user.id)],
       });
 
-      // Update the state
-      setChats([...chats, response.data]);
+      // Update the state by putting the new chat at the top of the list
+      // setChats([...chats, response.data]);
+      setChats([response.data, ...chats]);
 
       // Use socket to broadcast to everyone else to refresh their list of chats
-      socket.emit("chat_added");
+      socket.emit("new_chat");
 
       // Set chat name back to empty string
       setChatName("");

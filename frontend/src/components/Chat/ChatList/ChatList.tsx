@@ -15,8 +15,8 @@ import { Chat } from "../../../models/Chat";
 
 const ChatList = () => {
   const { user } = useUser();
-  const { showChat, setShowChat, chats } = useChats();
-  const [showChatItem, setShowChatItem] = useState<boolean>(false);
+  const { showChat, setShowChat, showChatItem, setShowChatItem, chats } = useChats();
+  // const [showChatItem, setShowChatItem] = useState<boolean>(false);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [showManageChatModal, setShowManageChatModal] =
     useState<boolean>(false);

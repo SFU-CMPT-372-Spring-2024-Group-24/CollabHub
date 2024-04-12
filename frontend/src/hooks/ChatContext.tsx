@@ -36,6 +36,8 @@ interface ChatContextType {
   socket: Socket;
   showChat: boolean;
   setShowChat: (value: boolean) => void;
+  showChatItem: boolean;
+  setShowChatItem: (value: boolean) => void;
   sortChats: (chats: Chat[]) => Chat[];
 }
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -57,6 +59,7 @@ export const ChatProvider = ({ children }: Props) => {
   const [chats, setChats] = useState<Chat[]>([]);
   const { handleApiError } = useApiErrorHandler();
   const [showChat, setShowChat] = useState<boolean>(false);
+  const [showChatItem, setShowChatItem] = useState<boolean>(false);
 
   // Fetch chats for the user
   useEffect(() => {
@@ -80,9 +83,9 @@ export const ChatProvider = ({ children }: Props) => {
     };
     getRecentChats();
 
-    socket.on("refresh_user_list", getRecentChats);
+    socket.on("refresh_chats", getRecentChats);
     return () => {
-      socket.off("refresh_user_list");
+      socket.off("refresh_chats");
     };
   }, [user]);
 
@@ -111,17 +114,24 @@ export const ChatProvider = ({ children }: Props) => {
   }, [chats, setChats, socket]);
 
   // Sort the chats by the last message
+  // const sortChats = (chats: Chat[]) => {
+  //   return [...chats].sort((a, b) => {
+  //     if (a.lastMessage && b.lastMessage) {
+  //       return new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime();
+  //     } else if (a.lastMessage) {
+  //       return -1;
+  //     } else if (b.lastMessage) {
+  //       return 1;
+  //     } else {
+  //       return 0;
+  //     }
+  //   });
+  // };
   const sortChats = (chats: Chat[]) => {
     return [...chats].sort((a, b) => {
-      if (a.lastMessage && b.lastMessage) {
-        return new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime();
-      } else if (a.lastMessage) {
-        return -1;
-      } else if (b.lastMessage) {
-        return 1;
-      } else {
-        return 0;
-      }
+      const aDate = a.lastMessage ? new Date(a.lastMessage.createdAt) : new Date(a.createdAt);
+      const bDate = b.lastMessage ? new Date(b.lastMessage.createdAt) : new Date(b.createdAt);
+      return bDate.getTime() - aDate.getTime();
     });
   };
 
@@ -133,6 +143,8 @@ export const ChatProvider = ({ children }: Props) => {
         socket,
         showChat,
         setShowChat,
+        showChatItem,
+        setShowChatItem,
         sortChats,
       }}
     >

@@ -151,8 +151,8 @@ io.on("connection", (socket) => {
     socket.leave(roomId);
   });
 
-  socket.on("chat_added", () => {
-    socket.broadcast.emit("refresh_user_list");
+  socket.on("new_chat", () => {
+    socket.broadcast.emit("refresh_chats");
   });
 
   socket.on("send_message", (message) => {
