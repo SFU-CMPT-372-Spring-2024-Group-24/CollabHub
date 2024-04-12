@@ -7,10 +7,9 @@ import { Link } from "react-router-dom";
 // Components
 import UserModal from "../Modals/UserModal/UserModal";
 import SearchBar from "./SearchBar";
+import GeneralSearchBar from "./GeneralSearchBar";
 // Hooks
 import { useChats } from "../../hooks/ChatContext";
-// Todo:
-// Display search results from backend
 
 interface Props {
   searchPlaceholder: string;
@@ -28,7 +27,11 @@ const Header = ({ searchPlaceholder }: Props) => {
         </h1>
       </Link>
 
-      <SearchBar placeholder={searchPlaceholder} />
+      {searchPlaceholder === "Search" ? (
+        <GeneralSearchBar placeholder={searchPlaceholder} />
+      ) : (
+        <SearchBar placeholder={searchPlaceholder} />
+      )}
 
       <button
         type="button"

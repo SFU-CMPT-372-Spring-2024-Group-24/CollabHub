@@ -1,101 +1,32 @@
 // Hooks
 import { useState, useEffect, useRef } from "react";
-import { useUser } from "../../hooks/UserContext";
 import { useTasks } from "../../hooks/TaskContext";
 // Models
 import { User } from "../../models/User";
 import { FileModel as File } from "../../models/FileModel";
 import { Task } from "../../models/Task";
-import { Project } from "../../models/Project";
-import { Role } from "../../models/ProjectRole";
 // Components
 import PreviewFileModal from "../Modals/PreviewFile/PreviewFileModal";
 import TaskModal from "../Modals/TaskModal/TaskModal";
-import GeneralSearchBar from "./GeneralSearchBar";
 // Icons
 import { IoSearch } from "react-icons/io5";
-// API
-import { api } from "../../api";
 
 interface Props {
   placeholder: string;
 }
 
 const SearchBar = ({ placeholder = "Search" }: Props) => {
-  const pathname = window.location.pathname.split("/");
-  const projectId = parseInt(pathname[2]);
-
-  if (isNaN(projectId)) {
-    return <GeneralSearchBar placeholder={placeholder} />;
-  }
-
   // TaskProvider
-  const { user } = useUser();
-  const [project, setProject] = useState<Project | null>(null);
-  const [userRole, setUserRole] = useState<Role | null>(null);
-  const { lists, projectMembers, projectFiles, selectedTask, setSelectedTask } = useTasks();
-
-  if (!isNaN(projectId)) {
-    // Fetch project data
-    useEffect(() => {
-      const fetchProject = async () => {
-        try {
-          const response = await api.get(`/projects/${projectId}`);
-
-          if (response.status === 200) {
-            setProject(response.data);
-          }
-        } catch (error) {
-          // open("/projects/notfound");
-        }
-      };
-
-      fetchProject();
-    }, []);
-
-    // Fetch user role in project
-    useEffect(() => {
-      if (!project || !user) return;
-
-      const fetchUserRole = async () => {
-        try {
-          const response = await api.get(`/roles/${project.id}`);
-          setUserRole(response.data);
-        } catch (error) {
-          console.error("Error fetching user role:", error);
-        }
-      };
-
-      fetchUserRole();
-    }, [project]);
-
-    // Fetch user role in project
-    useEffect(() => {
-      if (!project || !user) return;
-
-      const fetchUserRole = async () => {
-        try {
-          const response = await api.get(`/roles/${project.id}`);
-          setUserRole(response.data);
-        } catch (error) {
-          console.error("Error fetching user role:", error);
-        }
-      };
-
-      fetchUserRole();
-    }, [project]);
-  }
+  const { project, lists, projectMembers, projectFiles, selectedTask, setSelectedTask } = useTasks();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [results, setResults] = useState<{ users: User[], files: File[], tasks: Task[], projects: Project[], otherProjects: Project[] }>({ users: [], files: [], tasks: [], projects: [], otherProjects: [] });
+  const [results, setResults] = useState<{ users: User[], files: File[], tasks: Task[]}>({ users: [], files: [], tasks: [] });
   const [isResultsVisible, setIsResultsVisible] = useState(false);
   const searchInputRef = useRef(null);
   const searchResultsRef = useRef<HTMLDivElement | null>(null);
-
   const [isShowingPreviewFileModal, setIsShowingPreviewFileModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
   const [isShowingTaskModal, setIsShowingTaskModal] = useState(false);
-  // const [selectedTask, setSelectedTask] = useState<Task | undefined>(undefined);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -123,31 +54,17 @@ const SearchBar = ({ placeholder = "Search" }: Props) => {
     setIsResultsVisible(true);
 
     if (value.trim().length === 0) {
-      setResults({ users: [], files: [], tasks: [], projects: [], otherProjects: [] });
+      setResults({ users: [], files: [], tasks: [] });
       return;
     } else if (value.trim().length <= 1) {
       return;
     }
 
-    if (pathname[1] === "projects" && !isNaN(projectId)) {
-      await searchInProject();
-    } else {
-      await search();
-    }
+    searchInProject();
   };
 
-  const searchInProject = async () => {
+  const searchInProject = () => {
     try {
-      // const userResponse = await api.get(`search/users/project/${projectId}?query=${searchTerm}`);
-      // const fileResponse = await api.get(`search/files/project/${projectId}?query=${searchTerm}`);
-      // const taskResponse = await api.get(`search/tasks/project/${projectId}?query=${searchTerm}`);
-      // setResults({
-      //   users: userResponse.data.users,
-      //   files: fileResponse.data.files,
-      //   tasks: taskResponse.data.tasks,
-      //   projects: [],
-      //   otherProjects: []
-      // });
       const files = projectFiles.filter(file => file.name.toLowerCase().includes(searchTerm.toLowerCase()));
       const tasks = lists.flatMap(list => list.tasks).filter(task => task.name.toLowerCase().includes(searchTerm.toLowerCase()));
       const users = projectMembers.filter(member => member.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -155,31 +72,11 @@ const SearchBar = ({ placeholder = "Search" }: Props) => {
         users,
         files,
         tasks,
-        projects: [],
-        otherProjects: []
       });
     } catch (error) {
       console.error(error);
     }
   };
-
-  const search = async () => {
-    // Search for the term everywhere
-    try {
-      const userResponse = await api.get(`search/users?query=${searchTerm}`);
-      const projectResponse = await api.get(`search/projects?query=${searchTerm}`);
-      // const otherProjectResponse = await api.get(`search/projects/other?query=${searchTerm}`);
-      setResults({
-        users: userResponse.data.users,
-        files: [],
-        tasks: [],
-        projects: projectResponse.data.projects,
-        otherProjects: []
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  }
 
   const onFileClick = (file: File) => {
     setSelectedFile(file);
@@ -195,7 +92,7 @@ const SearchBar = ({ placeholder = "Search" }: Props) => {
     setSearchTerm("");
   };
 
-  const isResultsEmpty = results.users.length === 0 && results.files.length === 0 && results.tasks.length === 0 && results.projects.length === 0 && results.otherProjects.length === 0;
+  const isResultsEmpty = results.users.length === 0 && results.files.length === 0 && results.tasks.length === 0;
 
   const content = (
     <div className="search-bar">
@@ -260,35 +157,6 @@ const SearchBar = ({ placeholder = "Search" }: Props) => {
                 ))}
               </>
             )}
-            {results.projects.length > 0 && (
-              <>
-                <div className="search-result-header">
-                  <b>Projects</b>
-                </div>
-                {results.projects.map(project => (
-                  <div
-                    key={project.id}
-                    className="search-result"
-                    onClick={() => open(`/projects/${project.id}`, "_self")}
-                  >
-                    <b>{project.name}</b>
-                    <p>{project.description}</p>
-                  </div>
-                ))}
-              </>
-            )}
-            {results.otherProjects.length > 0 && (
-              <>
-                <div className="search-result-header">
-                  <b>Other projects</b>
-                </div>
-                {results.otherProjects.map(project => (
-                  <div key={project.id} className="search-result">
-                    <p>{project.name}</p>
-                  </div>
-                ))}
-              </>
-            )}
             {searchTerm.trim().length <= 1 ? (
               <div className="search-result">
                 <p>Type more to search</p>
@@ -304,9 +172,9 @@ const SearchBar = ({ placeholder = "Search" }: Props) => {
     </div>
   );
 
-  if (!isNaN(projectId)) {
+  if (project) {
     return (<>
-      {project && userRole && <>
+      {project && <>
         {content}
         <PreviewFileModal
           showPreviewFileModal={isShowingPreviewFileModal}
