@@ -41,8 +41,7 @@ const GoogleSignIn = () => {
   useEffect(() => {
     if (window.google && window.google.accounts) {
       window.google.accounts.id.initialize({
-        client_id:
-          "504287112333-gbmjfmf6oejadvgo4jbb80odvmirdcek.apps.googleusercontent.com",
+        client_id:import.meta.env.VITE_APP_GOOGLE_CLIENT_ID,
         callback: handleCallbackResponse,
       });
 
