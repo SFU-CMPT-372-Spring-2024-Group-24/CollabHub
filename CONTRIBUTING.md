@@ -76,6 +76,12 @@ GCLOUD_STORAGE_BUCKET=# e.g., bucket-name
 NODE_ENV=development
 ```
 
+Change to the `frontend/` directory. Create a `.env` file with the following variable:
+
+```bash
+VITE_APP_GOOGLE_CLIENT_ID=# your Google ID (for Google authentication)
+```
+
 ### Install dependencies
 
 In the `backend/` directory, run:
