@@ -7,6 +7,42 @@ A fullstack project management application built using the PERN (PostgreSQL, Exp
 
 For instructions on setting up a development environment and getting started with CollabHub, please refer to [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Technical Implementation
+
+### User Authentication
+
+- Implemented a secure, session-based authentication system, and integrated with third-party authentication provider using OAuth 2.0
+
+### Admin Dashboard
+
+- Developed complex, role-based user interfaces and managed user permissions by introducing an administrative dashboard that allows for comprehensive management of users and projects.
+
+### Project and Task Management
+
+- Implemented CRUD operations using Express.js and Sequelize as the ORM for PostgreSQL to manage data.
+
+- Tasks within projects can be moved between lists (To Do, In Progress, Done) via a React-based drag-and-drop interface or a dropdown menu.
+
+### Role-based Access Control
+
+- Implemented role-based access control within projects, with roles such as Owner, Editor, and Viewer, each having different levels of privileges, from full project management to view-only access.
+
+### Real-time Communication
+
+- Integrated Socket.IO, a WebSocket library, to facilitate real-time, bidirectional communication between users for enhanced collaboration.
+
+### File Sharing and Previewing
+
+- Leveraged Google Cloud Storage, a cloud-based storage, for file sharing and uploading within projects, with a built-in React-based file previewer supporting various file types.
+
+### Search Capability
+
+- Enhanced user experience by implementing a robust search functionality that allows users to search for project-related entities, users, and other projects. This search functionality uses Sequelize's operators for case-insensitive and multi-field matching, providing efficient and flexible search options to users.
+
+### Other technical details
+
+- The application is deployed on a virtual machine instance using the Compute Engine service provided by Google Cloud Platform. The PostgreSQL database is hosted on Google Cloud SQL, and file storage is handled using a Google Cloud Storage bucket.
+
 ## Features
 
 ### User authentication
@@ -38,7 +74,7 @@ For instructions on setting up a development environment and getting started wit
     - Modify descriptions
     - Set due dates
     - Assign users and files
-    - Establish priorities
+    - Establish priority levels
     - Add comments
 
 ### Chat functionality
